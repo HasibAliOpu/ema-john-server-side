@@ -22,9 +22,20 @@ async function run() {
     await client.connect();
     const productCollection = client.db("emaJohn").collection("product");
     app.get("/product", async (req, res) => {
+      console.log("query", req.query);
+      const count = parseInt(req.query.count);
+      const page = parseInt(req.query.page);
       const query = {};
       const cursor = productCollection.find(query);
-      const products = await cursor.toArray();
+      let products;
+      if (count || page) {
+        products = await cursor
+          .skip(page * count)
+          .limit(count)
+          .toArray();
+      } else {
+        products = await cursor.toArray();
+      }
       res.send(products);
 
       // get for count
